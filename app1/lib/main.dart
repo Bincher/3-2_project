@@ -1,68 +1,80 @@
+// ignore_for_file: avoid_print, must_be_immutable, no_logic_in_create_state
+
 import 'package:flutter/material.dart';
 
 void main() {
   runApp(MyApp());
 }
 
-// ignore: must_be_immutable
-class MyApp extends StatefulWidget {
-  MyApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  Widget build(BuildContext context) {
+    return const MaterialApp(home: MyListWidget());
+  }
 }
 
-class _MyAppState extends State<MyApp> {
-  bool enabled = false;
+class MyListWidget extends StatefulWidget {
+  const MyListWidget({super.key});
 
-  String stateText = "disable";
+  @override
+  State<StatefulWidget> createState() {
+    return _MyListWidgetState();
+  }
+}
 
-  void changeCheck() {
+class _MyListWidgetState extends State<MyListWidget> {
+  List<Widget> widgetList = [
+    // UniqueKey()뒤 ,의 여부따라 저장시 라인수가 달라짐
+    MyColorItemWidget(
+      Colors.red,
+      key: UniqueKey(),
+    ),
+    MyColorItemWidget(Colors.blue, key: UniqueKey()),
+    // UniqueKey()를 지우면 제대로된 동작이 불가능
+  ];
+  onChange() {
+    print(widgetList.elementAt(0).key);
     setState(() {
-      if (enabled) {
-        stateText = "disable";
-        enabled = false;
-      } else {
-        stateText = "enable";
-        enabled = true;
-      }
+      widgetList.insert(1, widgetList.removeAt(0));
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Scaffold(
-            appBar: AppBar(
-              title: const Text('Stateless Test'),
-            ),
-            body: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: (enabled
-                        ? const Icon(
-                            Icons.check_box,
-                            size: 20,
-                          )
-                        : const Icon(
-                            Icons.check_box_outline_blank,
-                            size: 20,
-                          )),
-                    color: Colors.red,
-                    onPressed: changeCheck,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.only(left: 16),
-                    child: Text(
-                      stateText,
-                      style: const TextStyle(
-                          fontSize: 30, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-            )));
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text('Key Test'),
+        ),
+        body: Column(children: [
+          Row(
+            children: widgetList,
+          ),
+          ElevatedButton(onPressed: onChange, child: Text("toggle"))
+        ]));
+  }
+}
+
+class MyColorItemWidget extends StatefulWidget {
+  Color color;
+  MyColorItemWidget(this.color, {Key? key}) : super(key: key);
+  @override
+  State<StatefulWidget> createState() {
+    return _MyColorItemWidgetState(color);
+  }
+}
+
+class _MyColorItemWidgetState extends State<MyColorItemWidget> {
+  Color color;
+  _MyColorItemWidgetState(this.color);
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+        child: Container(
+      color: color,
+      width: 150,
+      height: 150,
+    ));
   }
 }
