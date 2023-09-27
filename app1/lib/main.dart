@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -11,20 +11,125 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: MyListWidget());
+    return const MaterialApp(home: MyTestWidget());
   }
 }
 
-class MyListWidget extends StatefulWidget {
-  const MyListWidget({super.key});
+class MyTestWidget extends StatefulWidget {
+  const MyTestWidget({super.key});
 
   @override
   State<StatefulWidget> createState() {
-    return _MyListWidgetState();
+    return _MyTestWidgetState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      body: Column(
+        children: [
+          Container(
+              margin: EdgeInsets.only(bottom: 5),
+              color: Colors.yellow,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 50,
+                    height: 100,
+                    color: Colors.red,
+                  ),
+                  Container(
+                    width: 50,
+                    height: 50,
+                    color: Colors.green,
+                  ),
+                  Container(
+                    width: 50,
+                    height: 150,
+                    color: Colors.blue,
+                  ),
+                ],
+              )),
+          Container(
+              color: Colors.yellow,
+              margin: EdgeInsets.only(bottom: 5),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Container(
+                    width: 50,
+                    height: 100,
+                    color: Colors.red,
+                  ),
+                  Container(
+                    width: 50,
+                    height: 50,
+                    color: Colors.green,
+                  ),
+                  Container(
+                    width: 50,
+                    height: 150,
+                    color: Colors.blue,
+                  ),
+                ],
+              )),
+          Container(
+              color: Colors.yellow,
+              margin: EdgeInsets.only(bottom: 5),
+              height: 200,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    width: 50,
+                    height: 100,
+                    color: Colors.red,
+                  ),
+                  Container(
+                    width: 50,
+                    height: 50,
+                    color: Colors.green,
+                  ),
+                  Container(
+                    width: 50,
+                    height: 150,
+                    color: Colors.blue,
+                  ),
+                ],
+              )),
+          Container(
+            color: Colors.yellow,
+            margin: EdgeInsets.only(bottom: 5),
+            height: 200,
+            child: Stack(
+              children: [
+                Container(
+                  color: Colors.red,
+                ),
+                Container(
+                  width: 100,
+                  height: 100,
+                  color: Colors.green,
+                ),
+                Container(
+                  width: 50,
+                  height: 50,
+                  color: Colors.yellow,
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
-class _MyListWidgetState extends State<MyListWidget> {
+class _MyTestWidgetState extends State<MyTestWidget> {
   List<Widget> widgetList = [
     // UniqueKey()뒤 ,의 여부따라 저장시 라인수가 달라짐
     MyColorItemWidget(
@@ -43,6 +148,7 @@ class _MyListWidgetState extends State<MyListWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Scaffold라는 이름의 객체를 생성, new Scaffold
     return Scaffold(
         appBar: AppBar(
           title: const Text('Key Test'),
@@ -51,7 +157,7 @@ class _MyListWidgetState extends State<MyListWidget> {
           Row(
             children: widgetList,
           ),
-          ElevatedButton(onPressed: onChange, child: Text("toggle"))
+          ElevatedButton(onPressed: onChange, child: const Text("toggle"))
         ]));
   }
 }
