@@ -1,98 +1,85 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         home: Scaffold(
             appBar: AppBar(
-              title: Text('Test'),
+              title: const Text('Test'),
             ),
-            body: TestScreen()));
+            body: const TestScreen()));
   }
 }
 
 class TestScreen extends StatefulWidget {
+  const TestScreen({super.key});
+
   @override
-  TextState createState() => TextState();
+  MyFormState createState() => MyFormState();
 }
 
-class TextState extends State<TestScreen> {
-  bool? isChecked = true;
-  String? selectPlatform;
-  double sliderValue = 5.0;
-  bool switchValue = true;
+class MyFormState extends State<TestScreen> {
+  final _formKey = GlobalKey<FormState>();
+  String? firstName;
+  String? lastName;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text('Checkbox Test'),
-        Row(
-          children: [
-            Checkbox(
-                value: isChecked,
-                onChanged: (bool? value) {
-                  setState(() {
-                    isChecked = value;
-                  });
-                }),
-            Text('checkbox value is $isChecked')
-          ],
-        ),
-        Text('Radio Test'),
-        Row(
-          children: [
-            Radio(
-                value: "android",
-                groupValue: selectPlatform,
-                onChanged: (String? value) {
-                  setState(() {
-                    selectPlatform = value;
-                  });
-                }),
-            Text('android')
-          ],
-        ),
-        Row(
-          children: [
-            Radio(
-                value: "ios",
-                groupValue: selectPlatform,
-                onChanged: (String? value) {
-                  setState(() {
-                    selectPlatform = value;
-                  });
-                }),
-            Text('ios')
-          ],
-        ),
-        Text('select platform is $selectPlatform'),
-        Text('Slider Test'),
-        Slider(
-            value: sliderValue,
-            min: 0,
-            max: 10,
-            onChanged: (double value) {
-              setState(() {
-                sliderValue = value;
-              });
-            }),
-        Text('slider value is $sliderValue'),
-        Text('Switch Test'),
-        Switch(
-            value: switchValue,
-            onChanged: (bool value) {
-              setState(() {
-                switchValue = value;
-              });
-            }),
-        Text('select value is $switchValue')
-      ],
+    return Container(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          const Text('Form Test'),
+          Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'FirstName'),
+                  validator: (value) {
+                    if (value?.isEmpty ?? false) {
+                      return 'Please enter first name';
+                    }
+                    return null;
+                  },
+                  onSaved: (String? value) {
+                    firstName = value;
+                  },
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'LastName'),
+                  validator: (value) {
+                    if (value?.isEmpty ?? false) {
+                      return 'Please enter last name';
+                    }
+                    return null;
+                  },
+                  onSaved: (String? value) {
+                    lastName = value;
+                  },
+                ),
+              ],
+            ),
+          ),
+          ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState?.validate() ?? false) {
+                  _formKey.currentState?.save();
+                  print('firstName: $firstName, lastName : $lastName');
+                }
+              },
+              child: const Text('submit')),
+        ],
+      ),
     );
   }
 }
