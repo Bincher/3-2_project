@@ -22,50 +22,76 @@ class TestScreen extends StatefulWidget {
 }
 
 class TextState extends State<TestScreen> {
-  final controller = TextEditingController();
-  int textCounter = 0;
-
-  _printValue() {
-    print("_printValue(): ${controller.text}");
-    setState(() {
-      textCounter = controller.text.length;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    controller.addListener(_printValue);
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
+  bool? isChecked = true;
+  String? selectPlatform;
+  double sliderValue = 5.0;
+  bool switchValue = true;
 
   @override
   Widget build(BuildContext context) {
-    print("build....");
     return Column(
       children: [
-        Text('TextField Test'),
-        TextField(
-          style: TextStyle(fontSize: 15.0),
-          controller: controller,
-          decoration: InputDecoration(
-            labelText: 'Data',
-            prefixIcon: Icon(Icons.input),
-            border: OutlineInputBorder(),
-            hintText: "Hint Text",
-            helperText: "데이터를 입력하세요.",
-            counterText: "$textCounter characters",
-          ),
-          textInputAction: TextInputAction.search,
-          keyboardType: TextInputType.emailAddress,
-          minLines: 5,
-          maxLines: 5,
+        Text('Checkbox Test'),
+        Row(
+          children: [
+            Checkbox(
+                value: isChecked,
+                onChanged: (bool? value) {
+                  setState(() {
+                    isChecked = value;
+                  });
+                }),
+            Text('checkbox value is $isChecked')
+          ],
         ),
+        Text('Radio Test'),
+        Row(
+          children: [
+            Radio(
+                value: "android",
+                groupValue: selectPlatform,
+                onChanged: (String? value) {
+                  setState(() {
+                    selectPlatform = value;
+                  });
+                }),
+            Text('android')
+          ],
+        ),
+        Row(
+          children: [
+            Radio(
+                value: "ios",
+                groupValue: selectPlatform,
+                onChanged: (String? value) {
+                  setState(() {
+                    selectPlatform = value;
+                  });
+                }),
+            Text('ios')
+          ],
+        ),
+        Text('select platform is $selectPlatform'),
+        Text('Slider Test'),
+        Slider(
+            value: sliderValue,
+            min: 0,
+            max: 10,
+            onChanged: (double value) {
+              setState(() {
+                sliderValue = value;
+              });
+            }),
+        Text('slider value is $sliderValue'),
+        Text('Switch Test'),
+        Switch(
+            value: switchValue,
+            onChanged: (bool value) {
+              setState(() {
+                switchValue = value;
+              });
+            }),
+        Text('select value is $switchValue')
       ],
     );
   }
