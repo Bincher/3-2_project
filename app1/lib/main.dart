@@ -1,48 +1,86 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(MaterialApp(
+    home: MyApp(),
+    debugShowCheckedModeBanner: false,
+  ));
 }
 
-class MyApp extends StatelessWidget {
-  PageController controller =
-      PageController(initialPage: 1, viewportFraction: 0.8);
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  PageController page = PageController(initialPage: 0);
+  int pageIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Scaffold(
-            appBar: AppBar(
-              title: Text('Test'),
-            ),
-            body: PageView(
-              controller: controller,
-              children: [
-                Container(
-                  margin: EdgeInsets.all(20),
-                  color: Colors.red,
-                  child: Center(
-                    child: Text('OnePage',
-                        style: TextStyle(color: Colors.white, fontSize: 30)),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.all(20),
-                  color: Colors.green,
-                  child: Center(
-                    child: Text('TwoPage',
-                        style: TextStyle(color: Colors.white, fontSize: 30)),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.all(20),
-                  color: Colors.blue,
-                  child: Center(
-                    child: Text('ThreePage',
-                        style: TextStyle(color: Colors.white, fontSize: 30)),
-                  ),
-                ),
-              ],
-            )));
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Page View"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              page.previousPage(
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.linearToEaseOut,
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.arrow_forward),
+            onPressed: () {
+              page.nextPage(
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.linearToEaseOut,
+              );
+            },
+          ),
+        ],
+      ),
+      body: PageView(
+        controller: page,
+        scrollDirection: Axis.horizontal,
+        pageSnapping: true,
+        children: [
+          Container(
+            color: Colors.deepOrange,
+            child: const Center(
+                child: Text(
+              "Page-1",
+              style: TextStyle(color: Colors.white, fontSize: 25),
+            )),
+          ),
+          Container(
+            color: Colors.grey,
+            child: const Center(
+                child: Text(
+              "Page-2",
+              style: TextStyle(color: Colors.white, fontSize: 25),
+            )),
+          ),
+          Container(
+            color: Colors.teal,
+            child: const Center(
+                child: Text(
+              "Page-3",
+              style: TextStyle(color: Colors.white, fontSize: 25),
+            )),
+          ),
+          Container(
+            color: Colors.green,
+            child: const Center(
+                child: Text(
+              "Page-4",
+              style: TextStyle(color: Colors.white, fontSize: 25),
+            )),
+          ),
+        ],
+      ),
+    );
   }
 }
