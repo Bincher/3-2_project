@@ -1,84 +1,155 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 void main() {
-  runApp(MaterialApp(
-    home: MyApp(),
-    debugShowCheckedModeBanner: false,
-  ));
+  runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  PageController page = PageController(initialPage: 0);
-  int pageIndex = 0;
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Page View"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              page.previousPage(
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.linearToEaseOut,
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.arrow_forward),
-            onPressed: () {
-              page.nextPage(
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.linearToEaseOut,
-              );
-            },
-          ),
-        ],
-      ),
-      body: PageView(
-        controller: page,
-        scrollDirection: Axis.horizontal,
-        pageSnapping: true,
+    return MaterialApp(
+        home: Scaffold(
+            appBar: AppBar(
+              title: const Text('Test'),
+            ),
+            body: const TestScreen()));
+  }
+}
+
+class TestScreen extends StatefulWidget {
+  const TestScreen({super.key});
+
+  @override
+  TextState createState() => TextState();
+}
+
+class TextState extends State<TestScreen> {
+  DateTime dateValue = DateTime.now();
+  TimeOfDay timeValue = TimeOfDay.now();
+
+  _dialog() {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Dialog Title"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const TextField(
+                  decoration: InputDecoration(border: OutlineInputBorder()),
+                ),
+                Row(
+                  children: [
+                    Checkbox(value: true, onChanged: (value) {}),
+                    const Text('수신동의')
+                  ],
+                )
+              ],
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text("OK"))
+            ],
+          );
+        });
+  }
+
+  _bottomSheet() {
+    showBottomSheet(
+        context: context,
+        backgroundColor: Colors.yellow,
+        builder: (context) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.add),
+                title: const Text('ADD'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.remove),
+                title: const Text('REMOVE'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        });
+  }
+
+  _modalBottomSheet() {
+    showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.yellow,
+        builder: (context) {
+          return SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.add),
+                  title: const Text('ADD'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.remove),
+                  title: const Text('REMOVE'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                )
+              ],
+            ),
+          );
+        });
+  }
+
+  Future datePicker() async {
+    DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(2016),
+        lastDate: DateTime(2030));
+    if (picked != null) setState(() => dateValue = picked);
+  }
+
+  Future timePicker() async {
+    TimeOfDay? selectedTime = await showTimePicker(
+      initialTime: TimeOfDay.now(),
+      context: context,
+    );
+    if (selectedTime != null) setState(() => timeValue = selectedTime);
+  }
+
+  // dart fix --apply
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            color: Colors.deepOrange,
-            child: const Center(
-                child: Text(
-              "Page-1",
-              style: TextStyle(color: Colors.white, fontSize: 25),
-            )),
-          ),
-          Container(
-            color: Colors.grey,
-            child: const Center(
-                child: Text(
-              "Page-2",
-              style: TextStyle(color: Colors.white, fontSize: 25),
-            )),
-          ),
-          Container(
-            color: Colors.teal,
-            child: const Center(
-                child: Text(
-              "Page-3",
-              style: TextStyle(color: Colors.white, fontSize: 25),
-            )),
-          ),
-          Container(
-            color: Colors.green,
-            child: const Center(
-                child: Text(
-              "Page-4",
-              style: TextStyle(color: Colors.white, fontSize: 25),
-            )),
-          ),
+          ElevatedButton(onPressed: _dialog, child: const Text('dialog')),
+          ElevatedButton(onPressed: _bottomSheet, child: const Text('bottomsheet')),
+          ElevatedButton(
+              onPressed: _modalBottomSheet, child: const Text('modal bottomsheet')),
+          ElevatedButton(onPressed: datePicker, child: const Text('datepicker')),
+          Text('date : ${DateFormat('yyyy-MM-dd').format(dateValue)}'),
+          ElevatedButton(onPressed: timePicker, child: const Text('timepicker')),
+          Text('time : ${timeValue.hour}:${timeValue.minute}'),
         ],
       ),
     );
