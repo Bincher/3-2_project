@@ -1,157 +1,62 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<MyApp>
+    with SingleTickerProviderStateMixin {
+  late TabController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = TabController(length: 3, vsync: this);
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         home: Scaffold(
             appBar: AppBar(
-              title: const Text('Test'),
-            ),
-            body: const TestScreen()));
-  }
-}
-
-class TestScreen extends StatefulWidget {
-  const TestScreen({super.key});
-
-  @override
-  TextState createState() => TextState();
-}
-
-class TextState extends State<TestScreen> {
-  DateTime dateValue = DateTime.now();
-  TimeOfDay timeValue = TimeOfDay.now();
-
-  _dialog() {
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text("Dialog Title"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const TextField(
-                  decoration: InputDecoration(border: OutlineInputBorder()),
-                ),
-                Row(
-                  children: [
-                    Checkbox(value: true, onChanged: (value) {}),
-                    const Text('수신동의')
-                  ],
-                )
-              ],
-            ),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text("OK"))
-            ],
-          );
-        });
-  }
-
-  _bottomSheet() {
-    showBottomSheet(
-        context: context,
-        backgroundColor: Colors.yellow,
-        builder: (context) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.add),
-                title: const Text('ADD'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                },
+              title: Text('Tab Test'),
+              bottom: TabBar(
+                controller: controller,
+                tabs: <Widget>[
+                  Tab(text: 'One'),
+                  Tab(text: 'Two'),
+                  Tab(text: 'Three'),
+                ],
               ),
-              ListTile(
-                leading: const Icon(Icons.remove),
-                title: const Text('REMOVE'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        });
-  }
-
-  _modalBottomSheet() {
-    showModalBottomSheet(
-        context: context,
-        backgroundColor: Colors.yellow,
-        builder: (context) {
-          return SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.add),
-                  title: const Text('ADD'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
+            ),
+            //add........................
+            body: TabBarView(
+              controller: controller,
+              children: <Widget>[
+                Center(
+                  child: Text(
+                    'One Screen',
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                  ),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.remove),
-                  title: const Text('REMOVE'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
+                Center(
+                  child: Text(
+                    'Two Screen',
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Center(
+                  child: Text(
+                    'Three Screen',
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                  ),
                 )
               ],
-            ),
-          );
-        });
-  }
-
-  Future datePicker() async {
-    DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime(2016),
-        lastDate: DateTime(2030));
-    if (picked != null) setState(() => dateValue = picked);
-  }
-
-  Future timePicker() async {
-    TimeOfDay? selectedTime = await showTimePicker(
-      initialTime: TimeOfDay.now(),
-      context: context,
-    );
-    if (selectedTime != null) setState(() => timeValue = selectedTime);
-  }
-
-  // dart fix --apply
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ElevatedButton(onPressed: _dialog, child: const Text('dialog')),
-          ElevatedButton(onPressed: _bottomSheet, child: const Text('bottomsheet')),
-          ElevatedButton(
-              onPressed: _modalBottomSheet, child: const Text('modal bottomsheet')),
-          ElevatedButton(onPressed: datePicker, child: const Text('datepicker')),
-          Text('date : ${DateFormat('yyyy-MM-dd').format(dateValue)}'),
-          ElevatedButton(onPressed: timePicker, child: const Text('timepicker')),
-          Text('time : ${timeValue.hour}:${timeValue.minute}'),
-        ],
-      ),
-    );
+            )));
   }
 }
