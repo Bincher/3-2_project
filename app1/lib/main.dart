@@ -1,55 +1,108 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
-  runApp(Nav2App());
+  runApp(const MyApp());
 }
 
-class Nav2App extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<StatefulWidget> createState() {
+    return MyAppState();
+  }
+}
+
+class MyAppState extends State<MyApp> {
+  String result = '';
+
+  onPressGet() async {
+    Map<String, String> headers = {
+      "content-type": "application/json",
+      "accept": "application/json",
+    };
+    http.Response response = await http.get(
+        Uri.parse('https://jsonplaceholder.typicode.com/posts/1'),
+        headers: headers);
+    if (response.statusCode == 200) {
+      setState(() {
+        result = response.body;
+      });
+    } else {
+      print('error......');
+    }
+  }
+
+  onPressPost() async {
+    try {
+      http.Response response = await http.post(
+          Uri.parse('https://jsonplaceholder.typicode.com/posts'),
+          body: {'title': 'hello', 'body': 'world', 'userId': '1'});
+      print('statusCode : ${response.statusCode}');
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        setState(() {
+          result = response.body;
+        });
+      } else {
+        print('error......');
+      }
+    } catch (e) {
+      print('error ... $e');
+    }
+  }
+
+  onPressClient() async {
+    var client = http.Client();
+    try {
+      http.Response response = await client.post(
+          Uri.parse('https://jsonplaceholder.typicode.com/posts'),
+          body: {'title': 'hello', 'body': 'world', 'userId': '1'});
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        response = await client
+            .get(Uri.parse('https://jsonplaceholder.typicode.com/posts/1'));
+        setState(() {
+          result = response.body;
+        });
+      } else {
+        print('error......');
+      }
+    } finally {
+      client.close();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      routes: {
-        '/': (context) => HomeScreen(),
-        '/details': (context) => DetailScreen(),
-      },
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: Center(
-        child: ElevatedButton(
-          //FlatButton
-          child: Text('View Details'),
-          onPressed: () {
-            Navigator.pushNamed(
-              context,
-              '/details',
-            );
-          },
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Test'),
         ),
-      ),
-    );
-  }
-}
-
-class DetailScreen extends StatelessWidget {
-  const DetailScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: Center(
-        child: ElevatedButton(
-          child: const Text('Pop!'),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(result),
+              ElevatedButton(
+                onPressed: onPressGet,
+                child: const Text('GET'),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: onPressPost,
+                child: const Text('POST'),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: onPressClient,
+                child: const Text('Client'),
+              ),
+            ],
+          ),
         ),
       ),
     );
