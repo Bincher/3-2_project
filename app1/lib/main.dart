@@ -25,7 +25,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // 작업 목록을 저장하는 리스트
   final List<Map<String, dynamic>> _workList = [
     {"id": 1, "work": "10/17 소프트웨어공학 과제2", "isChecked": true},
     {"id": 2, "work": "10/19 오픈소스프로젝트 과제2", "isChecked": false},
@@ -33,19 +32,18 @@ class _HomePageState extends State<HomePage> {
   ];
 
   List<Map<String, dynamic>> _foundWorks = [];
-  bool _showCompleted = true; // 완료된 작업을 보여주는 토글 변수
+  bool _showCompleted = true;
 
   @override
   initState() {
-    _foundWorks = List.from(_workList); // 처음에는 모든 작업을 보여줍니다.
+    _foundWorks = List.from(_workList);
     super.initState();
   }
 
-  // 새 작업을 추가하는 다이얼로그를 열기 위한 함수
   void _dialog() {
     showDialog(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (BuildContext context) {
         String newWork = "";
         return AlertDialog(
@@ -62,7 +60,6 @@ class _HomePageState extends State<HomePage> {
           actions: [
             TextButton(
               onPressed: () {
-                // 새로운 작업을 입력받아 목록에 추가합니다.
                 Map<String, dynamic> newWorkItem = {
                   "id": _workList.length + 1,
                   "work": newWork,
@@ -70,6 +67,7 @@ class _HomePageState extends State<HomePage> {
                 };
 
                 setState(() {
+                  // Add the new work to the list
                   _workList.add(newWorkItem);
                   _foundWorks.add(newWorkItem);
                 });
@@ -84,11 +82,10 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // 작업 목록을 검색하는 함수
   void _runFilter(String enteredKeyword) {
     List<Map<String, dynamic>> results = [];
     if (enteredKeyword.isEmpty) {
-      results = List.from(_workList); // 검색어가 비어있을 때 모든 작업을 보여줍니다.
+      results = List.from(_workList);
     } else {
       results = _workList
           .where((work) =>
@@ -107,7 +104,6 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Work List'),
         actions: [
-          // 완료된 작업을 보여주는 토글 버튼
           IconButton(
             icon: Icon(_showCompleted ? Icons.check : Icons.clear),
             onPressed: () {
@@ -118,17 +114,15 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _dialog,
+        child: const Icon(Icons.add),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: Column(
-          children: <Widget>[
-            // 새 작업을 추가하는 FAB
-            FloatingActionButton(
-              onPressed: _dialog,
-              child: const Icon(Icons.add),
-            ),
+          children: [
             const SizedBox(height: 20),
-            // 작업 목록 검색 필드
             TextField(
               onChanged: (value) => _runFilter(value),
               decoration: const InputDecoration(
@@ -141,7 +135,6 @@ class _HomePageState extends State<HomePage> {
                       itemCount: _foundWorks.length,
                       itemBuilder: (context, index) {
                         final work = _foundWorks[index];
-                        // 완료된 작업을 보여주지 않음
                         if (!_showCompleted && work["isChecked"]) {
                           return const SizedBox.shrink();
                         }
