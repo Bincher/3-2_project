@@ -1,108 +1,67 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const ParentWidget());
+  runApp(const MyApp());
 }
 
-class ParentWidget extends StatefulWidget {
-  const ParentWidget({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
-  ParentWidgetState createState() => ParentWidgetState();
+  Widget build(BuildContext context) {
+    return const MaterialApp(home: MyStatefulPage());
+  }
 }
 
-class ParentWidgetState extends State<ParentWidget> {
-  bool favorited = false;
-  int favoriteCount = 0;
+class MyStatefulPage extends StatefulWidget {
+  const MyStatefulPage({super.key});
 
-  void toggleFavorite() {
-    setState(() {
-      if (favorited) {
-        favoriteCount -= 1;
-        favorited = false;
-      } else {
-        favoriteCount += 1;
-        favorited = true;
-      }
-    });
+  @override
+  _MyStatefulPageState createState() => _MyStatefulPageState();
+}
+
+class _MyStatefulPageState extends State<MyStatefulPage> {
+  int _counter = 0;
+
+  void _incrementCounter() {
+    setState(() => _counter++);
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('State Test'),
-        ),
-        body: Column(
+    return Scaffold(
+      appBar: AppBar(title: const Text('Example App')),
+      body: Center(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Parent Favorate ${favorited.toString()}'),
-            Text('Parent Count ${favoriteCount.toString()}'),
-            IconWidget(favorited: favorited, onChanged: toggleFavorite),
-            ContentWidget(favoriteCount: favoriteCount),
+          children: <Widget>[
+            const Text('Counter:'),
+            Text('$_counter', style: const TextStyle(fontSize: 24)),
           ],
         ),
       ),
+      // FloatingActionButtonWidget을 여기에 배치합니다.
+      floatingActionButton: const ExternalFloatingButton(),
     );
   }
 }
 
-class IconWidget extends StatelessWidget {
-  final bool favorited;
-  final Function onChanged;
-
-  const IconWidget(
-      {super.key, this.favorited = false, required this.onChanged});
-
-  void _handleTap() {
-    onChanged();
-  }
+class ExternalFloatingButton extends StatelessWidget {
+  const ExternalFloatingButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: IconButton(
-        icon: (favorited
-            ? const Icon(Icons.favorite)
-            : const Icon(Icons.favorite_border)),
-        iconSize: 200,
-        color: Colors.red,
-        onPressed: _handleTap,
-      ),
-    );
-  }
-}
+    // 부모 위젯인 MyHomePage의 상태를 찾습니다.
+    final homePageState =
+        context.findAncestorStateOfType<_MyStatefulPageState>();
 
-class ContentWidget extends StatefulWidget {
-  int favoriteCount;
-
-  ContentWidget({super.key, required this.favoriteCount});
-
-  @override
-  State<ContentWidget> createState() => _ContentWidgetState();
-}
-
-class _ContentWidgetState extends State<ContentWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        GestureDetector(
-            child: Text( // widget -> ContentWidget class를 전달 받기 위함
-              'Child favoriteCount : ${widget.favoriteCount}',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            onTap: () {
-              setState(() {
-                widget.favoriteCount += 1;
-              });
-            }),
-      ],
+    return FloatingActionButton(
+      onPressed: () {
+        // 부모 위젯의 _incrementCounter 메서드를 호출하여 카운터를 증가시킵니다.
+        homePageState?._incrementCounter();
+      },
+      tooltip: 'Increment Counter',
+      child: const Icon(Icons.add),
     );
   }
 }
