@@ -3,9 +3,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
-}
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   Future<int> delay() {
@@ -28,21 +26,32 @@ class MyApp extends StatelessWidget {
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               return Center(
-                child: Text(
-                  '${snapshot.data}',
-                  style: const TextStyle(color: Colors.black, fontSize: 30),
-                ),
+                child: defaultText('${snapshot.data}')
               );
             }
             return const Center(
-              child: Text(
-                'waiting',
-                style: TextStyle(color: Colors.black, fontSize: 30),
-              ),
+              child: defaultText("wating"),
             );
           },
         ),
       ),
+    );
+  }
+}
+
+// ignore: camel_case_types
+class defaultText extends StatelessWidget {
+  final String string;
+  const defaultText(
+    this.string,
+    {super.key}
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      string,
+      style: const TextStyle(color: Colors.black, fontSize: 30),
     );
   }
 }
