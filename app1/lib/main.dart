@@ -1,89 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class CounterProvider with ChangeNotifier {
-  int _counter = 0;
-  int get counter => _counter;
-  void incrementCounter() {
-    _counter++;
-    notifyListeners();
-  }
-}
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => CounterProvider(),
-      child: MaterialApp(
-        title: 'Navigation Example',
-        initialRoute: '/',
-        routes: {
-          '/': (context) => const HomePage(),
-          '/second': (context) => SecondPage(),
-        },
-      ),
-    );
-  }
-}
+  const MyApp({super.key});
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
   @override
   Widget build(BuildContext context) {
-    final counterProvider = Provider.of<CounterProvider>(context);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Home Page')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('Counter on Home Page: ${counterProvider.counter}'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/second');
-              },
-              child: const Text('Go to Second Page'),
-            ),
-          ],
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Provider Test'),
+        ),
+        body: Provider<int>(
+          create: (context) {
+            int sum = 0;
+            for (int i = 1; i <= 10; i++) {
+              sum += i;
+            }
+            return sum;
+          },
+          child: const SubWidget(),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: counterProvider.incrementCounter,
-        child: const Icon(Icons.add),
-      ),
     );
   }
 }
 
-class SecondPage extends StatelessWidget {
-  const SecondPage({super.key});
+class SubWidget extends StatelessWidget {
+  const SubWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
-    final counterProvider = Provider.of<CounterProvider>(context);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Second Page')),
-      body: Center(
+    final data = Provider.of<int>(context);
+    return Container(
+      color: Colors.orange,
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton(
-              onPressed: () {
-                counterProvider.incrementCounter();
-              },
-              child: const Text('Increase Counter on Home Page'),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Go Back'),
+          children: [
+            const Text('I am SubWidget',
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white)),
+            Text(
+              'Provider Data : $data',
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
           ],
         ),
@@ -91,3 +59,4 @@ class SecondPage extends StatelessWidget {
     );
   }
 }
+
