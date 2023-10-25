@@ -1,128 +1,92 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-void main() => runApp(const ParentWidget());
-
-class ParentWidget extends StatefulWidget {
-  const ParentWidget({super.key});
-  @override
-  ParentWidgetState createState() => ParentWidgetState();
+void main() {
+  runApp(MyApp());
 }
 
-class ParentWidgetState extends State<ParentWidget> {
-  bool favorited = false;
-  int favoriteCount = 10;
-
-  GlobalKey<ChildWidgetState> childKey = GlobalKey();
-  int childCount = 0;
-
-  void toggleFavorite() {
-    setState(() {
-      if (favorited) {
-        favoriteCount -= 1;
-        favorited = false;
-      } else {
-        favoriteCount += 1;
-        favorited = true;
-      }
-    });
+class CounterProvider with ChangeNotifier {
+  int _counter = 0;
+  int get counter => _counter;
+  void incrementCounter() {
+    _counter++;
+    notifyListeners();
   }
+}
 
-  void getChildData() {
-    ChildWidgetState? childState = childKey.currentState;
-    setState(() {
-      childCount = childState?.childCount ?? 0;
-    });
-  }
-
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('State Test'),
-        ),
-        body: Column(
+    return ChangeNotifierProvider(
+      create: (context) => CounterProvider(),
+      child: MaterialApp(
+        title: 'Navigation Example',
+        initialRoute: '/',
+        routes: {
+          '/': (context) => const HomePage(),
+          '/second': (context) => SecondPage(),
+        },
+      ),
+    );
+  }
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final counterProvider = Provider.of<CounterProvider>(context);
+    return Scaffold(
+      appBar: AppBar(title: const Text('Home Page')),
+      body: Center(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('I am Parent, child count : $childCount'),
-                ElevatedButton(
-                    onPressed: getChildData,
-                    child: const Text('get child data'))
-              ],
+          children: <Widget>[
+            Text('Counter on Home Page: ${counterProvider.counter}'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/second');
+              },
+              child: const Text('Go to Second Page'),
             ),
-            ChildWidget(key: childKey),
-            // ignore: prefer_const_constructors
-            IconWidget(),
-            // ignore: prefer_const_constructors
-            ContentWidget()
           ],
         ),
       ),
-    );
-  }
-}
-
-class ChildWidget extends StatefulWidget {
-  const ChildWidget({Key? key}) : super(key: key);
-
-  @override
-  State<StatefulWidget> createState() => ChildWidgetState();
-}
-
-class ChildWidgetState extends State<ChildWidget> {
-  int childCount = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text('I am Child, $childCount'),
-        ElevatedButton(
-          child: const Text('increment'),
-          onPressed: () {
-            setState(() => childCount++);
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class IconWidget extends StatelessWidget {
-  const IconWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    ParentWidgetState? state =
-        context.findAncestorStateOfType<ParentWidgetState>();
-    return Center(
-      child: IconButton(
-        icon: ((state?.favorited ?? false)
-            ? const Icon(Icons.favorite)
-            : const Icon(Icons.favorite_border)),
-        color: Colors.red,
-        iconSize: 200,
-        onPressed: state?.toggleFavorite,
+      floatingActionButton: FloatingActionButton(
+        onPressed: counterProvider.incrementCounter,
+        child: const Icon(Icons.add),
       ),
     );
   }
 }
 
-class ContentWidget extends StatelessWidget {
-  const ContentWidget({super.key});
-
+class SecondPage extends StatelessWidget {
+  const SecondPage({super.key});
   @override
   Widget build(BuildContext context) {
-    ParentWidgetState? state =
-        context.findAncestorStateOfType<ParentWidgetState>();
-    return Center(
-      child: Text(
-        'favoriteCount : ${state?.favoriteCount}',
-        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    final counterProvider = Provider.of<CounterProvider>(context);
+    return Scaffold(
+      appBar: AppBar(title: const Text('Second Page')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            ElevatedButton(
+              onPressed: () {
+                counterProvider.incrementCounter();
+              },
+              child: const Text('Increase Counter on Home Page'),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Go Back'),
+            ),
+          ],
+        ),
       ),
     );
   }
