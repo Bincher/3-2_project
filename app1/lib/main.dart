@@ -1,67 +1,129 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() => runApp(const ParentWidget());
+
+class ParentWidget extends StatefulWidget {
+  const ParentWidget({super.key});
+  @override
+  ParentWidgetState createState() => ParentWidgetState();
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ParentWidgetState extends State<ParentWidget> {
+  bool favorited = false;
+  int favoriteCount = 10;
+
+  GlobalKey<ChildWidgetState> childKey = GlobalKey();
+  int childCount = 0;
+
+  void toggleFavorite() {
+    setState(() {
+      if (favorited) {
+        favoriteCount -= 1;
+        favorited = false;
+      } else {
+        favoriteCount += 1;
+        favorited = true;
+      }
+    });
+  }
+
+  void getChildData() {
+    ChildWidgetState? childState = childKey.currentState;
+    setState(() {
+      childCount = childState?.childCount ?? 0;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: MyStatefulPage());
-  }
-}
-
-class MyStatefulPage extends StatefulWidget {
-  const MyStatefulPage({super.key});
-
-  @override
-  _MyStatefulPageState createState() => _MyStatefulPageState();
-}
-
-class _MyStatefulPageState extends State<MyStatefulPage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() => _counter++);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Example App')),
-      body: Center(
-        child: Column(
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('State Test'),
+        ),
+        body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('Counter:'),
-            Text('$_counter', style: const TextStyle(fontSize: 24)),
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('I am Parent, child count : $childCount'),
+                ElevatedButton(
+                    onPressed: getChildData,
+                    child: const Text('get child data'))
+              ],
+            ),
+            ChildWidget(key: childKey),
+            // ignore: prefer_const_constructors
+            IconWidget(),
+            // ignore: prefer_const_constructors
+            ContentWidget()
           ],
         ),
       ),
-      // FloatingActionButtonWidget을 여기에 배치합니다.
-      floatingActionButton: const ExternalFloatingButton(),
     );
   }
 }
 
-class ExternalFloatingButton extends StatelessWidget {
-  const ExternalFloatingButton({super.key});
+class ChildWidget extends StatefulWidget {
+  const ChildWidget({Key? key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => ChildWidgetState();
+}
+
+class ChildWidgetState extends State<ChildWidget> {
+  int childCount = 0;
 
   @override
   Widget build(BuildContext context) {
-    // 부모 위젯인 MyHomePage의 상태를 찾습니다.
-    final homePageState =
-        context.findAncestorStateOfType<_MyStatefulPageState>();
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('I am Child, $childCount'),
+        ElevatedButton(
+          child: const Text('increment'),
+          onPressed: () {
+            setState(() => childCount++);
+          },
+        ),
+      ],
+    );
+  }
+}
 
-    return FloatingActionButton(
-      onPressed: () {
-        // 부모 위젯의 _incrementCounter 메서드를 호출하여 카운터를 증가시킵니다.
-        homePageState?._incrementCounter();
-      },
-      tooltip: 'Increment Counter',
-      child: const Icon(Icons.add),
+class IconWidget extends StatelessWidget {
+  const IconWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    ParentWidgetState? state =
+        context.findAncestorStateOfType<ParentWidgetState>();
+    return Center(
+      child: IconButton(
+        icon: ((state?.favorited ?? false)
+            ? const Icon(Icons.favorite)
+            : const Icon(Icons.favorite_border)),
+        color: Colors.red,
+        iconSize: 200,
+        onPressed: state?.toggleFavorite,
+      ),
+    );
+  }
+}
+
+class ContentWidget extends StatelessWidget {
+  const ContentWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    ParentWidgetState? state =
+        context.findAncestorStateOfType<ParentWidgetState>();
+    return Center(
+      child: Text(
+        'favoriteCount : ${state?.favoriteCount}',
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      ),
     );
   }
 }
