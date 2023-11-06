@@ -11,28 +11,73 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Alarm Setting',
-      home: AlarmPage(),
+      title: 'Work List',
+      home: HomePage(),
     );
-    
   }
 }
 
-class AlarmPage extends StatefulWidget {
-  const AlarmPage({Key? key}) : super(key: key);
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
 
   @override
-  State<AlarmPage> createState() => _AlarmPageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _AlarmPageState extends State<AlarmPage> {
-  final controller = TextEditingController();
-  int textCounter = 0;
-  String savedWord = "";
+class _HomePageState extends State<HomePage> {
   final List<Map<String, dynamic>> _alarmList = [
     {"id": 1, "menu": "제육"},
   ];
+
   List<Map<String, dynamic>> _foundAlarms = [];
+  bool _showCompleted = true;
+
+  @override
+  initState() {
+    _foundAlarms = List.from(_alarmList);
+    super.initState();
+  }
+
+  void _dialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        String newAlarm = "";
+        return AlertDialog(
+          title: const Text("할 일 입력"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                onChanged: (value) => newAlarm = value,
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+              )
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Map<String, dynamic> newAlarmItem = {
+                  "id": _alarmList.length + 1,
+                  "menu": newAlarm,
+                };
+
+                setState(() {
+                  // Add the new work to the list
+                  _alarmList.add(newAlarmItem);
+                  _foundAlarms.add(newAlarmItem);
+                });
+
+                Navigator.of(context).pop();
+              },
+              child: const Text("OK"),
+            )
+          ],
+        );
+      },
+    );
+  }
 
   void _runFilter(String enteredKeyword) {
     List<Map<String, dynamic>> results = [];
@@ -40,8 +85,8 @@ class _AlarmPageState extends State<AlarmPage> {
       results = List.from(_alarmList);
     } else {
       results = _alarmList
-          .where((work) =>
-              work["work"].toLowerCase().contains(enteredKeyword.toLowerCase()))
+          .where((menu) =>
+              menu["menu"].toLowerCase().contains(enteredKeyword.toLowerCase()))
           .toList();
     }
 
@@ -50,86 +95,51 @@ class _AlarmPageState extends State<AlarmPage> {
     });
   }
 
-    @override
-    void initState() {
-      super.initState();
-      _foundAlarms = List.from(_alarmList);
-    }
-
-    @override
-    void dispose() {
-      controller.dispose();
-      super.dispose();
-    }
-
-    void _saveWord() {
-      setState(() {
-        savedWord = controller.text;
-      });
-    }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Work List'),
+        title: const Text('Alarm List'),
+        actions: [
+          IconButton(
+            icon: Icon(_showCompleted ? Icons.check : Icons.clear),
+            onPressed: () {
+              setState(() {
+                _showCompleted = !_showCompleted;
+              });
+            },
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _dialog,
+        child: const Icon(Icons.add),
       ),
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: Column(
           children: [
-            const Text('TextField Test'),
+            const SizedBox(height: 20),
             TextField(
-              style: const TextStyle(fontSize: 15.0),
-              controller: controller,
-              decoration: InputDecoration(
-                labelText: 'Data',
-                prefixIcon: const Icon(Icons.input),
-                border: const OutlineInputBorder(),
-                hintText: "Hint Text",
-                helperText: "데이터를 입력하세요.",
-                counterText: "$textCounter characters",
-              ),
-              textInputAction: TextInputAction.search,
-              keyboardType: TextInputType.emailAddress,
-              minLines: 5,
-              maxLines: 5,
-              onChanged: (value) {
-                setState(() {
-                  textCounter = value.length;
-                });
-              },
+              onChanged: (value) => _runFilter(value),
+              decoration: const InputDecoration(
+                  labelText: 'Search', suffixIcon: Icon(Icons.search)),
             ),
-            TextButton(
-              onPressed: () {
-                Map<String, dynamic> newAlarmItem = {
-                  "id": _alarmList.length + 1,
-                  "work": controller.text,
-                };
-
-                setState(() {
-                  // Add the new work to the list
-                  _alarmList.add(newAlarmItem);
-                  _foundAlarms.add(newAlarmItem);
-                });
-                Navigator.of(context).pop();
-              },
-              child: const Text("추가"),
-            ),
+            const SizedBox(height: 20),
             Expanded(
               child: _foundAlarms.isNotEmpty
                   ? ListView.builder(
                       itemCount: _foundAlarms.length,
                       itemBuilder: (context, index) {
-                        final menu = _foundAlarms[index];
+                        final alarm = _foundAlarms[index];
                         return Card(
-                            key: ValueKey(menu["id"]),
+                            key: ValueKey(alarm["id"]),
                             color: Colors.amberAccent,
                             elevation: 4,
                             margin: const EdgeInsets.symmetric(vertical: 10),
                             child: ListTile(
                                 title: Text(
-                                  menu['work'],
+                                  alarm['menu'],
                                   style: const TextStyle(
                                     fontSize: 18,
                                   ),
@@ -139,8 +149,8 @@ class _AlarmPageState extends State<AlarmPage> {
                                     onPressed: () {
                                       setState(
                                         () {
-                                          _foundAlarms.remove(menu);
-                                          _alarmList.remove(menu);
+                                          _foundAlarms.remove(alarm);
+                                          _alarmList.remove(alarm);
                                         },
                                       );
                                     })));
@@ -149,11 +159,10 @@ class _AlarmPageState extends State<AlarmPage> {
                       'No results found',
                       style: TextStyle(fontSize: 24),
                     ),
-        )]
-        )
-      )
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
-
-  
