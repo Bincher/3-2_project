@@ -11,8 +11,60 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Location',
-      home: LocationPage(),
+      title: '어플리케이션',
+      home: MyAppPage(),
+    );
+  }
+}
+
+class MyAppPage extends StatefulWidget {
+  const MyAppPage({super.key});
+
+  @override
+  _MyAppPageState createState() => _MyAppPageState();
+}
+
+class _MyAppPageState extends State<MyAppPage> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _navIndex = [
+    const CalenderPage(),
+    const AlarmListPage(),
+    const LocationPage(),
+  ];
+
+  void _onNavTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _navIndex.elementAt(_selectedIndex),
+      bottomNavigationBar: BottomNavigationBar(
+        fixedColor: Colors.blue,
+        unselectedItemColor: Colors.blueGrey,
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.my_library_books_outlined),
+            label: '메모',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: '커뮤니티',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: '내 정보',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        onTap: _onNavTapped,
+      )
     );
   }
 }
@@ -76,4 +128,163 @@ class _LocationPageState extends State<LocationPage> {
     ),
   );
 }
+}
+
+class AlarmListPage extends StatefulWidget {
+  const AlarmListPage({super.key});
+
+  @override
+  _AlarmListPageState createState() => _AlarmListPageState();
+}
+
+class _AlarmListPageState extends State<AlarmListPage> {
+  final List<Map<String, dynamic>> _alarmList = [
+    {"id": 1, "menu": "제육"},
+  ];
+
+  List<Map<String, dynamic>> _foundAlarms = [];
+
+  final TextEditingController _alarmTextController = TextEditingController();
+
+  @override
+  void initState() {
+    _foundAlarms = List.from(_alarmList);
+    super.initState();
+  }
+
+  void _runFilter(String enteredKeyword) {
+    List<Map<String, dynamic>> results = [];
+    if (enteredKeyword.isEmpty) {
+      results = List.from(_alarmList);
+    } else {
+      results = _alarmList
+          .where((menu) =>
+              menu["menu"].toLowerCase().contains(enteredKeyword.toLowerCase()))
+          .toList();
+    }
+
+    setState(() {
+      _foundAlarms = results;
+    });
+  }
+
+  void _addAlarm() {
+    final String newAlarm = _alarmTextController.text;
+    if (newAlarm.isNotEmpty) {
+      final int newId = _alarmList.length + 1;
+      final Map<String, dynamic> newAlarmItem = {"id": newId, "menu": newAlarm};
+      setState(() {
+        _alarmList.add(newAlarmItem);
+        _foundAlarms.add(newAlarmItem);
+      });
+      // Clear the text field after adding an alarm
+      _alarmTextController.clear();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('알람 설정'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          children: [
+            const Text(
+              "선호 메뉴 추가",
+              style: TextStyle(
+                fontSize: 22,
+              ),
+            ),
+            TextField(
+              controller: _alarmTextController,
+              decoration: InputDecoration(
+                labelText: '선호 메뉴',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: _addAlarm,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              onChanged: (value) => _runFilter(value),
+              decoration: const InputDecoration(
+                  labelText: '검색', suffixIcon: Icon(Icons.search)),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              "<아래 메뉴가 있는 날에는 알람이 전송됩니다>",
+              style: TextStyle(
+                fontSize: 10,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: _foundAlarms.isNotEmpty
+                  ? ListView.builder(
+                      itemCount: _foundAlarms.length,
+                      itemBuilder: (context, index) {
+                        final alarm = _foundAlarms[index];
+                        return Card(
+                            key: ValueKey(alarm["id"]),
+                            color: Colors.blue[100],
+                            elevation: 4,
+                            margin: const EdgeInsets.symmetric(vertical: 10),
+                            child: ListTile(
+                                title: Text(
+                                  alarm['menu'],
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                  ),
+                                ),
+                                trailing: IconButton(
+                                    icon: const Icon(Icons.delete),
+                                    onPressed: () {
+                                      setState(
+                                        () {
+                                          _foundAlarms.remove(alarm);
+                                          _alarmList.remove(alarm);
+                                        },
+                                      );
+                                    })));
+                      },
+                    )
+                  : const Text(
+                      '추가한 메뉴가 없어요 :(\n좋아하는 메뉴를 추가해주세요',
+                      style: TextStyle(
+                        fontSize: 10,
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class CalenderPage extends StatefulWidget {
+  const CalenderPage({super.key});
+
+  @override
+  State<CalenderPage> createState() => CalenderPageState();
+}
+
+class CalenderPageState extends State<CalenderPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('캘린더 식단'),
+      ),
+      body: const Center(
+        child: Text(
+          '캘린더 기능',
+        ),
+      ),
+    );
+  }
 }
