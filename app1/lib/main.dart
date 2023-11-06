@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/*
 void main() {
   runApp(const MyApp());
 }
@@ -12,71 +13,36 @@ class MyApp extends StatelessWidget {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Work List',
-      home: HomePage(),
+      home: AlarmListPage(),
     );
   }
 }
+*/
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+// 이제 AlarmListPage 클래스를 다른 페이지에서 사용할 수 있습니다.
+// 다른 페이지에서 이 클래스를 호출하려면 
+// 해당 페이지에 AlarmListPage() 위젯을 추가하면 됩니다.
+
+class AlarmListPage extends StatefulWidget {
+  const AlarmListPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  _AlarmListPageState createState() => _AlarmListPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _AlarmListPageState extends State<AlarmListPage> {
   final List<Map<String, dynamic>> _alarmList = [
     {"id": 1, "menu": "제육"},
   ];
 
   List<Map<String, dynamic>> _foundAlarms = [];
-  bool _showCompleted = true;
+
+  final TextEditingController _alarmTextController = TextEditingController();
 
   @override
-  initState() {
+  void initState() {
     _foundAlarms = List.from(_alarmList);
     super.initState();
-  }
-
-  void _dialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        String newAlarm = "";
-        return AlertDialog(
-          title: const Text("할 일 입력"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                onChanged: (value) => newAlarm = value,
-                decoration: const InputDecoration(border: OutlineInputBorder()),
-              )
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Map<String, dynamic> newAlarmItem = {
-                  "id": _alarmList.length + 1,
-                  "menu": newAlarm,
-                };
-
-                setState(() {
-                  // Add the new work to the list
-                  _alarmList.add(newAlarmItem);
-                  _foundAlarms.add(newAlarmItem);
-                });
-
-                Navigator.of(context).pop();
-              },
-              child: const Text("OK"),
-            )
-          ],
-        );
-      },
-    );
   }
 
   void _runFilter(String enteredKeyword) {
@@ -95,35 +61,58 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _addAlarm() {
+    final String newAlarm = _alarmTextController.text;
+    if (newAlarm.isNotEmpty) {
+      final int newId = _alarmList.length + 1;
+      final Map<String, dynamic> newAlarmItem = {"id": newId, "menu": newAlarm};
+      setState(() {
+        _alarmList.add(newAlarmItem);
+        _foundAlarms.add(newAlarmItem);
+      });
+      // Clear the text field after adding an alarm
+      _alarmTextController.clear();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Alarm List'),
-        actions: [
-          IconButton(
-            icon: Icon(_showCompleted ? Icons.check : Icons.clear),
-            onPressed: () {
-              setState(() {
-                _showCompleted = !_showCompleted;
-              });
-            },
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _dialog,
-        child: const Icon(Icons.add),
+        title: const Text('알람 설정'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: Column(
           children: [
+            const Text(
+              "선호 메뉴 추가",
+              style: TextStyle(
+                fontSize: 22,
+              ),
+            ),
+            TextField(
+              controller: _alarmTextController,
+              decoration: InputDecoration(
+                labelText: '선호 메뉴',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: _addAlarm,
+                ),
+              ),
+            ),
             const SizedBox(height: 20),
             TextField(
               onChanged: (value) => _runFilter(value),
               decoration: const InputDecoration(
-                  labelText: 'Search', suffixIcon: Icon(Icons.search)),
+                  labelText: '검색', suffixIcon: Icon(Icons.search)),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              "<아래 메뉴가 있는 날에는 알람이 전송됩니다>",
+              style: TextStyle(
+                fontSize: 10,
+              ),
             ),
             const SizedBox(height: 20),
             Expanded(
@@ -134,7 +123,7 @@ class _HomePageState extends State<HomePage> {
                         final alarm = _foundAlarms[index];
                         return Card(
                             key: ValueKey(alarm["id"]),
-                            color: Colors.amberAccent,
+                            color: Colors.blue[100],
                             elevation: 4,
                             margin: const EdgeInsets.symmetric(vertical: 10),
                             child: ListTile(
@@ -154,10 +143,13 @@ class _HomePageState extends State<HomePage> {
                                         },
                                       );
                                     })));
-                      })
+                      },
+                    )
                   : const Text(
-                      'No results found',
-                      style: TextStyle(fontSize: 24),
+                      '추가한 메뉴가 없어요 :(\n좋아하는 메뉴를 추가해주세요',
+                      style: TextStyle(
+                        fontSize: 10,
+                      ),
                     ),
             ),
           ],
