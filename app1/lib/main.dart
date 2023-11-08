@@ -1,70 +1,180 @@
 import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
+import 'student_menu.dart';
+import 'snack_bar_menu.dart';
+
 
 void main() {
-  runApp(const MyApp());
+  runApp(const MaterialApp(
+    home: MyHomePage(title: '학식 캘린더'),
+  ));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key, required String title});
 
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: '어플리케이션',
-      home: MyAppPage(),
-    );
-  }
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class MyAppPage extends StatefulWidget {
-  const MyAppPage({super.key});
+class _MyHomePageState extends State<MyHomePage> {
+  bool showButtons = false;
+  DateTime? _selectedDate;
+  int _currentIndex = 0;
+  DateTime? selectedDate = DateTime.now();  //날짜 클릭하면 파란색 동그라미 쓸려고 추가함
 
-  @override
-  _MyAppPageState createState() => _MyAppPageState();
-}
-
-class _MyAppPageState extends State<MyAppPage> {
-  int _selectedIndex = 0;
-
-  final List<Widget> _navIndex = [
-    const CalenderPage(),
-    const AlarmListPage(),
-    const LocationPage(),
-  ];
-
-  void _onNavTapped(int index) {
+  void _toggleButtons(DateTime selectedDate, DateTime focusedDate) {
     setState(() {
-      _selectedIndex = index;
+      showButtons = true; // 학식, 교직, 분식 버튼이 표시하도록 변경
+      _selectedDate = selectedDate;
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      body: _navIndex.elementAt(_selectedIndex),
+      appBar: AppBar(
+        title: const Center(child: Text('학식 캘린더')),
+      ),
+      body: Column(
+        children: [
+          TableCalendar(
+            firstDay: DateTime.utc(2010, 10, 16),
+            lastDay: DateTime.utc(2030, 3, 14),
+            focusedDay: DateTime.now(),
+            selectedDayPredicate: (DateTime day) {
+              return isSameDay(_selectedDate, day);
+            },
+            onDaySelected: onDaySelected,
+            headerStyle: const HeaderStyle(
+              formatButtonVisible: false,
+              titleCentered: true,
+              titleTextStyle: TextStyle(fontWeight: FontWeight.w700, fontSize: 16.0),
+            ),
+            calendarStyle: const CalendarStyle(
+              selectedDecoration: BoxDecoration(
+                color: Colors.blue,
+                shape: BoxShape.circle,
+              ),
+              todayDecoration: BoxDecoration(
+                color: Colors.blue,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          if (showButtons)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildButton('학식당', screenWidth * 0.25),
+                const SizedBox(
+                  width: 20,
+                ),
+                _buildButton('교직원', screenWidth * 0.25),
+                const SizedBox(
+                  width: 20,
+                ),
+                _buildButton('분식당', screenWidth * 0.25),
+              ],
+            ),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
-        fixedColor: Colors.blue,
-        unselectedItemColor: Colors.blueGrey,
-        showUnselectedLabels: true,
-        type: BottomNavigationBarType.fixed,
-        items: const [
+        currentIndex: _currentIndex,
+        onTap: (int index) {
+          setState(() {
+            _currentIndex = index;
+
+            if (index == 1) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AlarmListPage(),
+                ),
+              );
+            } else if (index == 2) { // 추가: 지도 아이콘을 누르면 지도 페이지로 이동
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LocationPage(),
+                ),
+              );
+            }
+          });
+        },
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
-            label: '식단 캘린더',
+            icon: Image.asset('assets/calendar.png', width: 50.0, height: 50.0),
+            label: '캘린더',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.alarm),
-            label: '알람설정',
+            icon: Image.asset('assets/alert.png', width: 50.0, height: 50.0),
+            label: '알림',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.location_on),
-            label: '식당 위치 및 정보',
+            icon: Image.asset('assets/navi.png', width: 50.0, height: 50.0),
+            label: '지도',
           ),
         ],
-        currentIndex: _selectedIndex,
-        onTap: _onNavTapped,
-      )
+      ),
+    );
+  }
+
+  Widget _buildButton(String label, double width) {
+    return SizedBox(
+      width: width,
+      child: ElevatedButton(
+        onPressed: () {
+          if (label == '학식당') {
+            // '학식당' 버튼을 눌렀을 때 화면을 전환
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MyListWidget(), // 학식당 메뉴 보기 기능
+              ),
+            );
+          } else if (label == '분식당') {
+            // '분식당' 버튼을 눌렀을 때 화면을 전환
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MyListWidget3(), // 분식당 메뉴 보기 기능
+              ),
+            );
+          }
+        },
+        child: Text(label),
+      ),
+    );
+  }
+  void onDaySelected(DateTime selectedDate, DateTime focusedDate) {
+    setState(() {
+      _selectedDate = selectedDate;
+      _toggleButtons(selectedDate, focusedDate);
+    });
+  }
+
+  // 각 식당 페이지 연결 코드
+  void showAlertDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('닫기'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -73,7 +183,7 @@ class LocationPage extends StatefulWidget {
   const LocationPage({super.key});
 
   @override
-  _LocationPageState createState() => _LocationPageState();
+  State<LocationPage> createState() => _LocationPageState();
 }
 
 class _LocationPageState extends State<LocationPage> {
@@ -95,7 +205,7 @@ class _LocationPageState extends State<LocationPage> {
               ),
               _buildLocationCard(
                 "학식당,교직원식당 입구\n08:20~09:20/11:30~13:30/17:00~18:30",
-                'images/img_cafeteria_outout.jpg',
+                'images/img_cafeteria_out.jpg',
               ),
               _buildLocationCard(
                 "분식당 입구\n11:00~14:00/16:00~18:30",
@@ -115,7 +225,7 @@ class _LocationPageState extends State<LocationPage> {
       child: Column(
         children: [
           AspectRatio(
-            aspectRatio: 16/9, // 이미지의 가로 세로 비율을 조정할 수 있음
+            aspectRatio: 16/9,
             child: Image.asset(
               imagePath,
               fit: BoxFit.cover,
@@ -131,20 +241,18 @@ class _LocationPageState extends State<LocationPage> {
 }
 
 class AlarmListPage extends StatefulWidget {
-  const AlarmListPage({Key? key}) : super(key: key);
+  const AlarmListPage({super.key});
 
   @override
-  _AlarmListPageState createState() => _AlarmListPageState();
+  State<AlarmListPage> createState() => _AlarmListPageState();
 }
 
 class _AlarmListPageState extends State<AlarmListPage> {
-  // 알람 목록과 필터된 알람 목록을 저장하는 리스트
   final List<Map<String, dynamic>> _alarmList = [
     {"id": 1, "menu": "제육"},
   ];
 
   List<Map<String, dynamic>> _foundAlarms = [];
-  // 사용자로부터 텍스트 입력을 받는 컨트롤러
   final TextEditingController _alarmTextController = TextEditingController();
 
   @override
@@ -153,34 +261,27 @@ class _AlarmListPageState extends State<AlarmListPage> {
     _foundAlarms = List.from(_alarmList);
   }
 
-  // 키워드에 따라 알람 필터링
   void _runFilter(String enteredKeyword) {
     setState(() {
       if (enteredKeyword.isEmpty) {
-        // 키워드가 비어있으면 원래 알람 목록을 표시
         _foundAlarms = List.from(_alarmList);
       } else {
-        // 키워드가 있는 경우 해당 키워드를 포함하는 알람 필터링
         _foundAlarms = _alarmList
             .where((menu) =>
-                menu["menu"].toLowerCase().contains(enteredKeyword.toLowerCase()))
+            menu["menu"].toLowerCase().contains(enteredKeyword.toLowerCase()))
             .toList();
       }
     });
   }
 
-  // 새로운 알람 추가
   void _addAlarm() {
     final String newAlarm = _alarmTextController.text;
     if (newAlarm.isNotEmpty) {
       final int newId = _alarmList.length + 1;
       final Map<String, dynamic> newAlarmItem = {"id": newId, "menu": newAlarm};
       setState(() {
-        // 알람 목록에 새 알람 추가
         _alarmList.add(newAlarmItem);
-        // 필터된 알람 목록에도 추가하여 표시
         _foundAlarms.add(newAlarmItem);
-        // 텍스트 필드 지우기
         _alarmTextController.clear();
       });
     }
@@ -208,13 +309,13 @@ class _AlarmListPageState extends State<AlarmListPage> {
                 labelText: '선호 메뉴',
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.add),
-                  onPressed: _addAlarm, // 알람 추가 버튼 클릭 시 _addAlarm 함수 호출
+                  onPressed: _addAlarm,
                 ),
               ),
             ),
             const SizedBox(height: 20),
             TextField(
-              onChanged: (value) => _runFilter(value), // 텍스트 필터링
+              onChanged: (value) => _runFilter(value),
               decoration: const InputDecoration(
                 labelText: '검색',
                 suffixIcon: Icon(Icons.search),
@@ -231,66 +332,42 @@ class _AlarmListPageState extends State<AlarmListPage> {
             Expanded(
               child: _foundAlarms.isNotEmpty
                   ? ListView.builder(
-                      itemCount: _foundAlarms.length,
-                      itemBuilder: (context, index) {
-                        final alarm = _foundAlarms[index];
-                        return Card(
-                          key: ValueKey(alarm["id"]),
-                          color: Colors.blue[100],
-                          elevation: 4,
-                          margin: const EdgeInsets.symmetric(vertical: 10),
-                          child: ListTile(
-                            title: Text(
-                              alarm['menu'],
-                              style: const TextStyle(
-                                fontSize: 18,
-                              ),
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () {
-                                setState(() {
-                                  // 알람 삭제 버튼 클릭 시 _foundAlarms 및 _alarmList에서 제거
-                                  _foundAlarms.remove(alarm);
-                                  _alarmList.remove(alarm);
-                                });
-                              },
-                            ),
-                          ),
-                        );
-                      },
-                    )
-                  : const Text(
-                      '추가한 메뉴가 없어요 :(\n좋아하는 메뉴를 추가해주세요',
-                      style: TextStyle(
-                        fontSize: 10,
+                itemCount: _foundAlarms.length,
+                itemBuilder: (context, index) {
+                  final alarm = _foundAlarms[index];
+                  return Card(
+                    key: ValueKey(alarm["id"]),
+                    color: Colors.blue[100],
+                    elevation: 4,
+                    margin: const EdgeInsets.symmetric(vertical: 10),
+                    child: ListTile(
+                      title: Text(
+                        alarm['menu'],
+                        style: const TextStyle(
+                          fontSize: 18,
+                        ),
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          setState(() {
+                            _foundAlarms.remove(alarm);
+                            _alarmList.remove(alarm);
+                          });
+                        },
                       ),
                     ),
+                  );
+                },
+              )
+                  : const Text(
+                '추가한 메뉴가 없어요 :(\n좋아하는 메뉴를 추가해주세요',
+                style: TextStyle(
+                  fontSize: 10,
+                ),
+              ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class CalenderPage extends StatefulWidget {
-  const CalenderPage({super.key});
-
-  @override
-  State<CalenderPage> createState() => CalenderPageState();
-}
-
-class CalenderPageState extends State<CalenderPage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('캘린더 식단'),
-      ),
-      body: const Center(
-        child: Text(
-          '캘린더 기능',
         ),
       ),
     );
