@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' show parse;
+import 'package:intl/intl.dart';
 
 void main() {
   runApp(MyApp());
@@ -10,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MyListWidget(selectedDate: DateTime.now()),
+      home: MyListWidget(selectedDate: DateTime.now(), selectedFormatedDate: DateFormat('yyyy-MM-dd').format(DateTime.now())),
       theme: ThemeData(
         appBarTheme: AppBarTheme(
           color: Colors.transparent,
@@ -34,8 +37,9 @@ class MyApp extends StatelessWidget {
 
 class MyListWidget extends StatefulWidget {
   final DateTime selectedDate;
-
-  MyListWidget({required this.selectedDate});
+  final String selectedFormatedDate;
+  
+  MyListWidget({required this.selectedDate, required this.selectedFormatedDate, });
 
   @override
   State<StatefulWidget> createState() {
@@ -63,12 +67,23 @@ class _MyListWidgetState extends State<MyListWidget> {
       );
       if (response.statusCode == 200) {
         final document = parse(response.body);
-        
+
         // Parse breakfast menu
-        final breakfastElements = document.querySelectorAll("#jwxe_main_content > div.ko > div > div.menu-list-box > div > table > tbody > tr:nth-child(1) > td:nth-child(${widget.selectedDate.weekday * 2 - 1}) > ul");
+        final breakfastElements = document.querySelectorAll("#jwxe_main_content > div.ko > div > div.menu-list-box > div > table > tbody > tr:nth-child(1) > td:nth-child(${widget.selectedDate.weekday * 2 - 1})");
         if (breakfastElements.isNotEmpty) {
           final breakfastMenu = breakfastElements[0].text;
           final modifiedBreakfastMenu = breakfastMenu.replaceAll(RegExp(r'\s{2,}'), '\n');
+          List<String> breakfastMenuLines = modifiedBreakfastMenu.split('\n');
+          breakfastMenuLines.removeWhere((element) => element.trim().isEmpty);
+
+          Map<String, dynamic> jsonData = {
+            'menuLines': breakfastMenuLines,
+            'selectedDate': widget.selectedFormatedDate,
+            'selectedLocation': "학식당",
+            'time': "조식"
+          };
+          String jsonString = jsonEncode(jsonData);
+          print(jsonString);
           setState(() {
             breakfastData = modifiedBreakfastMenu;
           });
@@ -79,12 +94,23 @@ class _MyListWidgetState extends State<MyListWidget> {
         }
 
         // Parse lunch menu
-        final lunchElements = document.querySelectorAll("#jwxe_main_content > div.ko > div > div.menu-list-box > div > table > tbody > tr:nth-child(3) > td:nth-child(${widget.selectedDate.weekday * 2 - 1}) > ul");
+        final lunchElements = document.querySelectorAll("#jwxe_main_content > div.ko > div > div.menu-list-box > div > table > tbody > tr:nth-child(3) > td:nth-child(${widget.selectedDate.weekday * 2 - 1})");
         if (lunchElements.isNotEmpty) {
           final lunchMenu = lunchElements[0].text;
           final modifiedLunchMenu = lunchMenu.replaceAll(RegExp(r'\s{2,}'), '\n');
+          List<String> lunchMenuLines = modifiedLunchMenu.split('\n');
+          lunchMenuLines.removeWhere((element) => element.trim().isEmpty);
+          Map<String, dynamic> jsonData = {
+            'menuLines': lunchMenuLines,
+            'selectedDate': widget.selectedFormatedDate,
+            'selectedLocation': "학식당",
+            'time': "중식"
+          };
+          String jsonString = jsonEncode(jsonData);
+          print(jsonString);
           setState(() {
             lunchData = modifiedLunchMenu;
+            
           });
         } else {
           setState(() {

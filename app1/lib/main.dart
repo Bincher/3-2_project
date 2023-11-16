@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'student_menu.dart';
 import 'snack_bar_menu.dart';
@@ -20,9 +21,9 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   bool showButtons = false;
   DateTime? _selectedDate;
+  String? formattedDate;
   int _currentIndex = 0;
   DateTime? selectedDate = DateTime.now();  //날짜 클릭하면 파란색 동그라미 쓸려고 추가함
-
   void _toggleButtons(DateTime selectedDate, DateTime focusedDate) {
     setState(() {
       showButtons = true; // 학식, 교직, 분식 버튼이 표시하도록 변경
@@ -124,7 +125,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _buildButton(String label, double width) {
+    String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate!);
     return SizedBox(
+      
       width: width,
       child: ElevatedButton(
         onPressed: () {
@@ -133,7 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => MyListWidget(selectedDate: _selectedDate!), // 학식당 메뉴 보기 기능
+                builder: (context) => MyListWidget(selectedDate: _selectedDate!,selectedFormatedDate: formattedDate), // 학식당 메뉴 보기 기능
               ),
             );
           } else if (label == '분식당') {
