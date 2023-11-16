@@ -133,7 +133,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => MyListWidget(), // 학식당 메뉴 보기 기능
+                builder: (context) => MyListWidget(selectedDate: _selectedDate!), // 학식당 메뉴 보기 기능
               ),
             );
           } else if (label == '분식당') {

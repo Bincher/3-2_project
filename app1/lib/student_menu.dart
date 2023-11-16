@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MyListWidget(),
+      home: MyListWidget(selectedDate: DateTime.now()),
       theme: ThemeData(
         appBarTheme: AppBarTheme(
           color: Colors.transparent,
@@ -33,6 +33,10 @@ class MyApp extends StatelessWidget {
 }
 
 class MyListWidget extends StatefulWidget {
+  final DateTime selectedDate;
+
+  MyListWidget({required this.selectedDate});
+
   @override
   State<StatefulWidget> createState() {
     return _MyListWidgetState();
@@ -57,13 +61,11 @@ class _MyListWidgetState extends State<MyListWidget> {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',
         },
       );
-
       if (response.statusCode == 200) {
         final document = parse(response.body);
-        final document2 = parse(response.body);
-        final breakfastElements = document.querySelectorAll(".menu-list-box table tbody tr:nth-child(1) td:nth-child(1)");
-        final lunchElements = document2.querySelectorAll(".menu-list-box table tbody tr:nth-child(1) td:nth-child(2)");
-
+        
+        // Parse breakfast menu
+        final breakfastElements = document.querySelectorAll("#jwxe_main_content > div.ko > div > div.menu-list-box > div > table > tbody > tr:nth-child(1) > td:nth-child(${widget.selectedDate.weekday * 2 - 1}) > ul");
         if (breakfastElements.isNotEmpty) {
           final breakfastMenu = breakfastElements[0].text;
           final modifiedBreakfastMenu = breakfastMenu.replaceAll(RegExp(r'\s{2,}'), '\n');
@@ -76,6 +78,8 @@ class _MyListWidgetState extends State<MyListWidget> {
           });
         }
 
+        // Parse lunch menu
+        final lunchElements = document.querySelectorAll("#jwxe_main_content > div.ko > div > div.menu-list-box > div > table > tbody > tr:nth-child(3) > td:nth-child(${widget.selectedDate.weekday * 2 - 1}) > ul");
         if (lunchElements.isNotEmpty) {
           final lunchMenu = lunchElements[0].text;
           final modifiedLunchMenu = lunchMenu.replaceAll(RegExp(r'\s{2,}'), '\n');
@@ -107,7 +111,7 @@ class _MyListWidgetState extends State<MyListWidget> {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(48.0),
         child: AppBar(
-          title: Text('학식당'),
+          title: Text('학식당 - ${widget.selectedDate.month}월 ${widget.selectedDate.day}일'),
           centerTitle: true,
           actions: [
             IconButton(
