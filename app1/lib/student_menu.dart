@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MyListWidget(selectedDate: DateTime.now(), selectedFormatedDate: DateFormat('yyyy-MM-dd').format(DateTime.now())),
+      home: MyListWidget(selectedDate: DateTime.now(), ),
       theme: ThemeData(
         appBarTheme: AppBarTheme(
           color: Colors.transparent,
@@ -37,9 +37,8 @@ class MyApp extends StatelessWidget {
 
 class MyListWidget extends StatefulWidget {
   final DateTime selectedDate;
-  final String selectedFormatedDate;
   
-  MyListWidget({required this.selectedDate, required this.selectedFormatedDate, });
+  MyListWidget({required this.selectedDate,});
 
   @override
   State<StatefulWidget> createState() {
@@ -60,7 +59,7 @@ class _MyListWidgetState extends State<MyListWidget> {
   void fetchMenuData() async {
     try {
       final response = await http.get(
-        Uri.parse('https://www.kumoh.ac.kr/ko/restaurant01.do'),
+        Uri.parse('https://www.kumoh.ac.kr/ko/restaurant01.do?mode=menuList&srDt=${DateFormat('yyyy').format(widget.selectedDate)}-${DateFormat('MM').format(widget.selectedDate)}-${DateFormat('dd').format(widget.selectedDate)}'),
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',
         },
@@ -78,9 +77,9 @@ class _MyListWidgetState extends State<MyListWidget> {
 
           Map<String, dynamic> jsonData = {
             'menuLines': breakfastMenuLines,
-            'selectedDate': widget.selectedFormatedDate,
-            'selectedLocation': "학식당",
-            'time': "조식"
+            'selectedDate': DateFormat('MM-dd').format(widget.selectedDate),
+            'selectedLocation': "student",
+            'time': "breakfast"
           };
           String jsonString = jsonEncode(jsonData);
           print(jsonString);
@@ -102,9 +101,9 @@ class _MyListWidgetState extends State<MyListWidget> {
           lunchMenuLines.removeWhere((element) => element.trim().isEmpty);
           Map<String, dynamic> jsonData = {
             'menuLines': lunchMenuLines,
-            'selectedDate': widget.selectedFormatedDate,
-            'selectedLocation': "학식당",
-            'time': "중식"
+            'selectedDate': DateFormat('MM-dd').format(widget.selectedDate),
+            'selectedLocation': "student",
+            'time': "lunch"
           };
           String jsonString = jsonEncode(jsonData);
           print(jsonString);

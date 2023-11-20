@@ -125,7 +125,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _buildButton(String label, double width) {
-    String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate!);
     return SizedBox(
       
       width: width,
@@ -136,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => MyListWidget(selectedDate: _selectedDate!,selectedFormatedDate: formattedDate), // 학식당 메뉴 보기 기능
+                builder: (context) => MyListWidget(selectedDate: _selectedDate!), // 학식당 메뉴 보기 기능
               ),
             );
           } else if (label == '분식당') {
@@ -144,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => MyListWidget3(), // 분식당 메뉴 보기 기능
+                builder: (context) => MyListWidget3(selectedDate: _selectedDate!), // 분식당 메뉴 보기 기능
               ),
             );
           }

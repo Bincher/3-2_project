@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' show parse;
+import 'package:intl/intl.dart';
 
 void main() {
   runApp(MyApp());
@@ -10,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MyListWidget3(),
+      home: MyListWidget3(selectedDate: DateTime.now()),
       theme: ThemeData(
         appBarTheme: AppBarTheme(
           color: Colors.transparent,
@@ -33,6 +36,10 @@ class MyApp extends StatelessWidget {
 }
 
 class MyListWidget3 extends StatefulWidget {
+  final DateTime selectedDate;
+
+  MyListWidget3({required this.selectedDate,});
+
   @override
   State<StatefulWidget> createState() {
     return _MyListWidgetState();
@@ -51,7 +58,7 @@ class _MyListWidgetState extends State<MyListWidget3> {
   void fetchMenuData() async {
     try {
       final response = await http.get(
-        Uri.parse('https://www.kumoh.ac.kr/ko/restaurant04.do'),
+        Uri.parse('https://www.kumoh.ac.kr/ko/restaurant04.do?mode=menuList&srDt=${DateFormat('yyyy').format(widget.selectedDate)}-${DateFormat('MM').format(widget.selectedDate)}-${DateFormat('dd').format(widget.selectedDate)}'),
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',
         },
@@ -59,11 +66,22 @@ class _MyListWidgetState extends State<MyListWidget3> {
 
       if (response.statusCode == 200) {
         final document = parse(response.body);
-        final foodElements = document.querySelectorAll(".menu-list-box table tbody tr:nth-child(1) td:nth-child(1)");
+        final foodElements = document.querySelectorAll(".menu-list-box table tbody tr:nth-child(1) td:nth-child(${widget.selectedDate.weekday * 2 - 1})");
 
         if (foodElements.isNotEmpty) {
           final foodMenu = foodElements[0].text;
           final modifiedFoodMenu = foodMenu.replaceAll(RegExp(r'\s{2,}'), '\n');
+          List<String> foodMenuLines = modifiedFoodMenu.split('\n');
+          foodMenuLines.removeWhere((element) => element.trim().isEmpty);
+
+          Map<String, dynamic> jsonData = {
+            'menuLines': foodMenuLines,
+            'selectedDate': DateFormat('MM-dd').format(widget.selectedDate),
+            'selectedLocation': "snack",
+            'time': "."
+          };
+          String jsonString = jsonEncode(jsonData);
+          print(jsonString);
           setState(() {
             foodData = modifiedFoodMenu;
           });
