@@ -85,6 +85,19 @@ class _MyListWidgetState extends State<MyListWidget3> {
           setState(() {
             foodData = modifiedFoodMenu;
           });
+
+          bool containsJeyuk = false;
+        for (String line in foodMenuLines) {
+          if (line.toLowerCase().contains('우동')) {
+            containsJeyuk = true;
+            break;
+          }
+        }
+        // '제육'이 포함되어 있다면 추가 동작 수행
+          if (containsJeyuk) {
+            // 원하는 동작을 수행하세요.
+            print('메뉴에 우동이 포함되어 있습니다.');
+          }
         } else {
           setState(() {
             foodData = "데이터가 존재하지 않습니다.";
