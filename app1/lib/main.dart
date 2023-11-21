@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'student_menu.dart';
 import 'snack_bar_menu.dart';
+import 'staff_menu.dart';
 
 
 void main() {
@@ -143,6 +144,14 @@ class _MyHomePageState extends State<MyHomePage> {
               context,
               MaterialPageRoute(
                 builder: (context) => MyListWidget3(selectedDate: _selectedDate!), // 분식당 메뉴 보기 기능
+              ),
+            );
+          }else if (label == '교직원') {
+            // '교직원' 버튼을 눌렀을 때 화면을 전환
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MyListWidget2(selectedDate: _selectedDate!), // 교직원 메뉴 보기 기능
               ),
             );
           }

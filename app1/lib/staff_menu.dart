@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' show parse;
 import 'package:intl/intl.dart';
 
+
 void main() {
   runApp(MyApp());
 }
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MyListWidget(selectedDate: DateTime.now()),
+      home: MyListWidget2(selectedDate: DateTime.now()),
       theme: ThemeData(
         appBarTheme: AppBarTheme(
           color: Colors.transparent,
@@ -35,10 +36,10 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyListWidget extends StatefulWidget {
+class MyListWidget2 extends StatefulWidget {
   final DateTime selectedDate;
 
-  MyListWidget({required this.selectedDate});
+  MyListWidget2({required this.selectedDate});
 
   @override
   State<StatefulWidget> createState() {
@@ -46,7 +47,7 @@ class MyListWidget extends StatefulWidget {
   }
 }
 
-class _MyListWidgetState extends State<MyListWidget> {
+class _MyListWidgetState extends State<MyListWidget2> {
   String lunchData = "로딩 중..."; // 상단 컨테이너 데이터
   String dinnerData = "로딩 중..."; // 하단 컨테이너 데이터
 
@@ -59,7 +60,7 @@ class _MyListWidgetState extends State<MyListWidget> {
   void fetchMenuData() async {
     try {
       final response = await http.get(
-        Uri.parse('https://www.kumoh.ac.kr/ko/restaurant01.do?mode=menuList&srDt=${DateFormat('yyyy').format(widget.selectedDate)}-${DateFormat('MM').format(widget.selectedDate)}-${DateFormat('dd').format(widget.selectedDate)}'),
+        Uri.parse('https://www.kumoh.ac.kr/ko/restaurant02.do?mode=menuList&srDt=${DateFormat('yyyy').format(widget.selectedDate)}-${DateFormat('MM').format(widget.selectedDate)}-${DateFormat('dd').format(widget.selectedDate)}'),
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',
         },
@@ -67,12 +68,12 @@ class _MyListWidgetState extends State<MyListWidget> {
 
       if (response.statusCode == 200) {
         final document = parse(response.body);
-        final breakfastElements = document.querySelectorAll(".menu-list-box table tbody tr:nth-child(1) td:nth-child(${widget.selectedDate.weekday * 2 - 1})");
-        final lunchElements = document.querySelectorAll(".menu-list-box table tbody tr:nth-child(3) td:nth-child(${widget.selectedDate.weekday * 2 - 1})");
+        final lunchElements = document.querySelectorAll(".menu-list-box table tbody tr:nth-child(1) td:nth-child(${widget.selectedDate.weekday * 2 - 1})");
+        final dinnerElements = document.querySelectorAll(".menu-list-box table tbody tr:nth-child(3) td:nth-child(${widget.selectedDate.weekday * 2 - 1})");
 
 
-        if (breakfastElements.isNotEmpty) {
-          final breakfastMenu = breakfastElements[0].text;
+        if (lunchElements.isNotEmpty) {
+          final breakfastMenu = lunchElements[0].text;
           final modifiedBreakfastMenu = breakfastMenu.replaceAll(RegExp(r'\s{2,}'), '\n');
           setState(() {
             lunchData = modifiedBreakfastMenu;
@@ -83,8 +84,8 @@ class _MyListWidgetState extends State<MyListWidget> {
           });
         }
 
-        if (lunchElements.isNotEmpty) {
-          final lunchMenu = lunchElements[0].text;
+        if (dinnerElements.isNotEmpty) {
+          final lunchMenu = dinnerElements[0].text;
           final modifiedLunchMenu = lunchMenu.replaceAll(RegExp(r'\s{2,}'), '\n');
           setState(() {
             dinnerData = modifiedLunchMenu;
@@ -123,7 +124,7 @@ class _MyListWidgetState extends State<MyListWidget> {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(48.0),
         child: AppBar(
-          title: Text('학식당'),
+          title: Text('교직원'),
           centerTitle: true,
           actions: [
             IconButton(
@@ -174,7 +175,7 @@ class _MyListWidgetState extends State<MyListWidget> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    "1000원",
+                    "5500원",
                     style: TextStyle(fontSize: 16.0, color: Colors.black),
                   ),
                 ),
@@ -213,7 +214,7 @@ class _MyListWidgetState extends State<MyListWidget> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    "3000원",
+                    "5500원",
                     style: TextStyle(fontSize: 16.0, color: Colors.black),
                   ),
                 ),
