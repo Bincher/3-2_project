@@ -4,7 +4,6 @@ import 'student_menu.dart';
 import 'snack_bar_menu.dart';
 import 'staff_menu.dart';
 
-
 void main() {
   runApp(const MaterialApp(
     home: MyHomePage(title: '학식 캘린더'),
