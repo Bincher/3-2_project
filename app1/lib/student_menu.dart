@@ -47,8 +47,8 @@ class MyListWidget extends StatefulWidget {
 }
 
 class _MyListWidgetState extends State<MyListWidget> {
-  String lunchData = "로딩 중..."; // 상단 컨테이너 데이터
-  String dinnerData = "로딩 중..."; // 하단 컨테이너 데이터
+  String breakfastData = "로딩 중..."; // 상단 컨테이너 데이터
+  String lunchData = "로딩 중..."; // 하단 컨테이너 데이터
 
   @override
   void initState() {
@@ -75,11 +75,11 @@ class _MyListWidgetState extends State<MyListWidget> {
           final breakfastMenu = breakfastElements[0].text;
           final modifiedBreakfastMenu = breakfastMenu.replaceAll(RegExp(r'\s{2,}'), '\n');
           setState(() {
-            lunchData = modifiedBreakfastMenu;
+            breakfastData = modifiedBreakfastMenu;
           });
         } else {
           setState(() {
-            lunchData = "데이터가 존재하지 않습니다.";
+            breakfastData = "데이터가 존재하지 않습니다.";
           });
         }
 
@@ -87,32 +87,32 @@ class _MyListWidgetState extends State<MyListWidget> {
           final lunchMenu = lunchElements[0].text;
           final modifiedLunchMenu = lunchMenu.replaceAll(RegExp(r'\s{2,}'), '\n');
           setState(() {
-            dinnerData = modifiedLunchMenu;
+            lunchData = modifiedLunchMenu;
           });
         } else {
           setState(() {
-            dinnerData = "데이터가 존재하지 않습니다.";
+            lunchData = "데이터가 존재하지 않습니다.";
           });
         }
 
         // Convert menu data to JSON format
         Map<String, dynamic> jsonData = {
+          'breakfastData': breakfastData,
           'lunchData': lunchData,
-          'dinnerData': dinnerData,
           'selectedDate': DateFormat('yyyy-MM-dd').format(widget.selectedDate),
         };
         String jsonString = jsonEncode(jsonData);
         print(jsonString);
       } else {
         setState(() {
+          breakfastData = "데이터를 가져오는 중 오류가 발생했습니다.";
           lunchData = "데이터를 가져오는 중 오류가 발생했습니다.";
-          dinnerData = "데이터를 가져오는 중 오류가 발생했습니다.";
         });
       }
     } catch (e) {
       setState(() {
+        breakfastData = "오류: $e";
         lunchData = "오류: $e";
-        dinnerData = "오류: $e";
       });
     }
   }
@@ -166,7 +166,7 @@ class _MyListWidgetState extends State<MyListWidget> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      lunchData,
+                      breakfastData,
                       style: TextStyle(fontSize: 16.0, color: Colors.black),
                     ),
                   ),
@@ -205,7 +205,7 @@ class _MyListWidgetState extends State<MyListWidget> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      dinnerData,
+                      lunchData,
                       style: TextStyle(fontSize: 16.0, color: Colors.black),
                     ),
                   ),
