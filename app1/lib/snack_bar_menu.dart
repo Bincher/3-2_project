@@ -86,7 +86,7 @@ class _MyListWidgetState extends State<MyListWidget3> {
 
     // 데이터가 없으면 추가
       if (!hasData) {
-        final data = await MenuFetcher.fetchMenuData(widget.selectedDate);
+        final data = await MenuFetcher.fetchMenuDataFromFirestore(widget.selectedDate);
         print("Fetched menu data: $data");
   
         saveMenuList(); // 변경된 menuList를 저장

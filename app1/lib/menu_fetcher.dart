@@ -1,41 +1,35 @@
 // menu_fetcher.dart
 
-import 'package:http/http.dart' as http;
-import 'package:html/parser.dart' show parse;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class MenuFetcher {
-  static Future<Map<String, dynamic>> fetchMenuData(DateTime selectedDate) async {
+  static Future<Map<String, dynamic>> fetchMenuDataFromFirestore(DateTime selectedDate) async {
+    print("go");
     try {
-      final response = await http.get(
-        Uri.parse('https://www.kumoh.ac.kr/ko/restaurant04.do?mode=menuList&srDt=${DateFormat('yyyy').format(selectedDate)}-${DateFormat('MM').format(selectedDate)}-${DateFormat('dd').format(selectedDate)}'),
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',
-        },
-      );
+      final today = DateFormat('MM-dd').format(selectedDate);
 
-      if (response.statusCode == 200) {
-        final document = parse(response.body);
-        final foodElements = document.querySelectorAll(".menu-list-box table tbody tr:nth-child(1) td:nth-child(${selectedDate.weekday * 2 - 1})");
+      final QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
+        .collection('Menu')
+        .where('selectedDate', isEqualTo: today)
+        .where('selectedLocation', isEqualTo: 'snack') // 추가 조건
+        .get();
 
-        if (foodElements.isNotEmpty) {
-          final foodMenu = foodElements[0].text;
-          final modifiedFoodMenu = foodMenu.replaceAll(RegExp(r'\s{2,}'), '\n');
-          List<String> foodMenuLines = modifiedFoodMenu.split('\n');
-          foodMenuLines.removeWhere((element) => element.trim().isEmpty);
+      if (snapshot.docs.isNotEmpty) {
+        final doc = snapshot.docs.first;
+        final data = doc.data();
 
-          Map<String, dynamic> jsonData = {
-            'menuLines': foodMenuLines,
-            'selectedDate': DateFormat('MM-dd').format(selectedDate),
-            'selectedLocation': "snack",
-            'time': "."
-          };
-          return jsonData;
-        } else {
-          return {'error': '데이터가 존재하지 않습니다.'};
-        }
+        return {
+          'menuLines': List<String>.from(data['menuLines']),
+          'selectedDate': data['selectedDate'],
+          'selectedLocation': data['selectedLocation'],
+          'time': data['time'],
+        };
       } else {
-        return {'error': '데이터를 가져오는 중 오류가 발생했습니다. Response code: ${response.statusCode}'};
+        return {'error': '해당 날짜의 메뉴가 존재하지 않습니다.'};
       }
     } catch (e) {
       return {'error': '오류: $e'};
